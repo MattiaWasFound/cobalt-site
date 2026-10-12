@@ -1,0 +1,55 @@
+name: publish
+on:
+  # The ledger is rebuilt at 03:00 UTC; fetch it 20 minutes later.
+  schedule:
+    - cron: "20 3 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the ledger
+        env:
+          LEDGER_READ_TOKEN: ${{ secrets.LEDGER_READ_TOKEN }}
+        run: |
+          mkdir -p site/v1
+          curl -fsS --retry 5 --retry-delay 60 --retry-all-errors \
+            -H "Authorization: Bearer $LEDGER_READ_TOKEN" \
+            https://cobalt-db.cobaltgame.workers.dev/v1/ledger.json -o site/v1/ledger.json
+      - name: Check it before publishing
+        run: |
+          python3 - <<'PY'
+          import json
+          d = json.load(open("site/v1/ledger.json"))
+          assert d["schema_version"] == 1, "unexpected schema_version"
+          assert d["currency"] == "EUR", "unexpected currency"
+          assert isinstance(d["global"]["players"], int), "no global totals"
+          assert isinstance(d["countries"], dict), "no countries"
+          print("ledger generated at", d["generated_at"], "with", d["global"]["players"], "players")
+          PY
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      actions: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
+      - name: Keep the schedule alive (GitHub disables it after 60 days without a commit)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow enable publish.yml --repo "${{ github.repository }}"
