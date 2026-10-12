@@ -19,7 +19,7 @@ Anyone can read it, from any website.
   "currency": "EUR",
   "global": {
     "players": 1234, "accrued": 5321.12, "artificial": 880.5, "paid": 410.0,
-    "artificial_by_tag": { "some_tag": 700.0, "other_tag": 180.5 }
+    "artificial_by_tag": { "cobalt_dropped": 880.5 }
   },
   "countries": {
     "DK": { "players": 40, "accrued": 212.3, "artificial": 31.0, "paid": 12.5, "zones": {} },
