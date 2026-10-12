@@ -8,9 +8,10 @@ while you play.
 <https://mattiawasfound.github.io/cobalt-site/v1/ledger.json>
 
 What all players together have spent on electricity while playing, and what
-they have donated to offset it, per country. It is rebuilt once a day, at
-about 03:20 UTC, and holds no usernames and nothing about any single player.
-Anyone can read it, from any website.
+they have donated to offset it, per country. It is rebuilt at least once a day, and
+as often as every 10 minutes while many people are playing. It holds no
+usernames and nothing about any single player. Anyone can read it, from any
+website. GitHub Pages may serve a copy up to 10 minutes old.
 
 ```json
 {
@@ -46,7 +47,7 @@ Anyone can read it, from any website.
 
 ## How it is published
 
-A scheduled GitHub Action ([publish.yml](.github/workflows/publish.yml))
-fetches the day's file from the game's server with a read token, checks
-it, and publishes it here on GitHub Pages. If a day's fetch fails, the
-previous day's file stays up.
+A GitHub Action ([publish.yml](.github/workflows/publish.yml)) fetches the
+file from the game's server with a read token, checks it, and publishes it
+here on GitHub Pages. The server starts it after every rebuild, and it also
+runs once a day on its own. If a fetch fails, the previous file stays up.
